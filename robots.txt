@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+
+Sitemap: https://familymealplanningtools.com/sitemap.xml
