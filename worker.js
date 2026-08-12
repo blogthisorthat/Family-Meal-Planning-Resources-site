@@ -8,6 +8,23 @@ export default {
       if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
       return extractRecipeRequest(request);
     }
+    if (url.pathname === '/') {
+      const response = await env.ASSETS.fetch(request);
+      const type = response.headers.get('content-type') || '';
+      if (!type.includes('text/html')) return response;
+      return new HTMLRewriter()
+        .on('.navlinks', {
+          element(element) {
+            element.append('<a href="/recipe-scaler.html">Recipe Scaler</a>', { html: true });
+          }
+        })
+        .on('.resources-grid', {
+          element(element) {
+            element.append('<a class="resource-card" href="/recipe-scaler.html"><strong>Recipe URL Ingredient Scaler</strong><span>Paste a recipe URL, extract its ingredient list, scale quantities for your family size, and add it to the weekly planner.</span></a>', { html: true });
+          }
+        })
+        .transform(response);
+    }
     return env.ASSETS.fetch(request);
   }
 };
@@ -120,9 +137,7 @@ function extractRecipeFromHtml(html) {
       const parsed = JSON.parse(raw);
       const recipe = findRecipeNode(parsed);
       if (recipe) return recipe;
-    } catch {
-      // Some sites emit malformed JSON-LD. Continue to the fallback below.
-    }
+    } catch {}
   }
 
   const ingredientMatch = html.match(/["']recipeIngredient["']\s*:\s*(\[[\s\S]{1,100000}?\])/i);
@@ -150,7 +165,7 @@ function findRecipeNode(node) {
   if (types.some(type => String(type).toLowerCase() === 'recipe')) return node;
 
   for (const value of Object.values(node)) {
-    if (value && (typeof value === 'object')) {
+    if (value && typeof value === 'object') {
       const found = findRecipeNode(value);
       if (found) return found;
     }
