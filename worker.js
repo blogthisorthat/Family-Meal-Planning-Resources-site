@@ -18,6 +18,11 @@ export default {
             element.append('<a href="/recipe-scaler.html">Recipe Scaler</a>', { html: true });
           }
         })
+        .on('.hero .wrap', {
+          element(element) {
+            element.append('<div style="margin-top:1.25rem;background:#fff;border:1px solid #dedfd8;border-radius:16px;padding:1rem 1.1rem;max-width:850px;box-shadow:0 10px 28px rgba(24,49,40,.06)"><strong style="color:#315849">👨‍🍳 Dad/Husband Mode:</strong> Built for busy dads and husbands who want to handle dinner without turning meal planning into a second job.<br><span style="color:#66756d;font-size:.92rem"><strong>Wives:</strong> if “What’s for dinner?” keeps bouncing back to you, send him this site. We gave him buttons, quantities, and a grocery list — he’s running out of excuses.</span></div>', { html: true });
+          }
+        })
         .on('.resources-grid', {
           element(element) {
             element.append('<a class="resource-card" href="/recipe-scaler.html"><strong>Recipe URL Ingredient Scaler</strong><span>Paste a recipe URL, extract its ingredient list, scale quantities for your family size, and add it to the weekly planner.</span></a>', { html: true });
