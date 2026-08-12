@@ -110,7 +110,7 @@ function scaleIngredient(text, factor) {
 
 function parseLeadingQuantity(text) {
   const normalized = normalizeFractionText(text);
-  const token = '(?:\\d+\\s+\\d+\\/\\d+|\\d+\\/\\d+|\\d+(?:\\.\\d+)?|[¼½¾⅓⅔⅛⅜⅝⅞])';
+  const token = '(?:\\d+\\s+[¼½¾⅓⅔⅛⅜⅝⅞]|\\d+\\s+\\d+\\/\\d+|\\d+\\/\\d+|\\d+(?:\\.\\d+)?|[¼½¾⅓⅔⅛⅜⅝⅞])';
   const match = normalized.match(new RegExp(`^\\s*(${token})(?:\\s*(?:-|–|—|to)\\s*(${token}))?(\\s*)(.*)$`, 'i'));
   if (!match) return null;
   const start = quantityToNumber(match[1]);
