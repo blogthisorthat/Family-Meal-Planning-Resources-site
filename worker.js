@@ -1,6 +1,33 @@
 const MAX_HTML_BYTES = 2_000_000;
 const MAX_REDIRECTS = 3;
 
+const SITE_NAV = `
+  <a class="brand" href="/">Family Meal Planning Tools</a>
+  <div class="navlinks site-nav-links" aria-label="Main navigation">
+    <a href="/#planner">Planner</a>
+    <a href="/recipe-scaler.html">Recipe Scaler</a>
+    <a href="/weekly-meal-planning-guide.html">Weekly Guide</a>
+    <a href="/budget-meal-planning.html">Budget Meals</a>
+    <a href="/grocery-list-planning.html">Grocery Lists</a>
+    <a href="/meal-planning-by-family-size.html">Family Size</a>
+    <a href="/about.html">About</a>
+    <a href="https://themanthatcookssometimes.blogspot.com/" target="_blank" rel="noopener">Recipe Blog</a>
+  </div>`;
+
+const NAV_CSS = `
+<style id="sitewide-navigation-styles">
+  .nav{display:flex!important;justify-content:space-between!important;align-items:center!important;gap:.8rem!important;flex-wrap:wrap!important;padding:1rem 0!important}
+  .nav .brand{font-weight:900!important;text-decoration:none!important;color:#183128!important;white-space:nowrap!important}
+  .navlinks.site-nav-links{display:flex!important;gap:.4rem!important;align-items:center!important;justify-content:flex-end!important;flex-wrap:wrap!important}
+  .navlinks.site-nav-links a{display:inline-block!important;text-decoration:none!important;font-weight:800!important;font-size:.84rem!important;line-height:1.15!important;color:#315849!important;background:#fff!important;border:1px solid #d7dfda!important;border-radius:999px!important;padding:.48rem .68rem!important;white-space:nowrap!important}
+  .navlinks.site-nav-links a:hover,.navlinks.site-nav-links a:focus{background:#e8f0eb!important;border-color:#bfcfc5!important;outline:none!important}
+  @media(max-width:900px){
+    .nav{flex-direction:column!important;align-items:flex-start!important}
+    .navlinks.site-nav-links{display:flex!important;width:100%!important;justify-content:flex-start!important;flex-wrap:wrap!important}
+    .navlinks.site-nav-links a{font-size:.82rem!important;padding:.46rem .62rem!important}
+  }
+</style>`;
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -8,16 +35,25 @@ export default {
       if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
       return extractRecipeRequest(request);
     }
-    if (url.pathname === '/') {
-      const response = await env.ASSETS.fetch(request);
-      const type = response.headers.get('content-type') || '';
-      if (!type.includes('text/html')) return response;
-      return new HTMLRewriter()
-        .on('.navlinks', {
-          element(element) {
-            element.append('<a href="/recipe-scaler.html">Recipe Scaler</a>', { html: true });
-          }
-        })
+
+    const response = await env.ASSETS.fetch(request);
+    const type = response.headers.get('content-type') || '';
+    if (!type.includes('text/html')) return response;
+
+    let rewriter = new HTMLRewriter()
+      .on('head', {
+        element(element) {
+          element.append(NAV_CSS, { html: true });
+        }
+      })
+      .on('.nav', {
+        element(element) {
+          element.setInnerContent(SITE_NAV, { html: true });
+        }
+      });
+
+    if (url.pathname === '/' || url.pathname === '/index.html') {
+      rewriter = rewriter
         .on('.hero .wrap', {
           element(element) {
             element.append('<div style="margin-top:1.25rem;background:#fff;border:1px solid #dedfd8;border-radius:16px;padding:1rem 1.1rem;max-width:850px;box-shadow:0 10px 28px rgba(24,49,40,.06)"><strong style="color:#315849">👨‍🍳 Dad/Husband Mode:</strong> Built for busy dads and husbands who want to handle dinner without turning meal planning into a second job.<br><span style="color:#66756d;font-size:.92rem"><strong>Wives:</strong> if “What’s for dinner?” keeps bouncing back to you, send him this site. We gave him buttons, quantities, and a grocery list — it’ll be fun!</span></div>', { html: true });
@@ -27,10 +63,10 @@ export default {
           element(element) {
             element.append('<a class="resource-card" href="/recipe-scaler.html"><strong>Recipe URL Ingredient Scaler</strong><span>Paste a recipe URL, extract its ingredient list, scale quantities for your family size, and add it to the weekly planner.</span></a>', { html: true });
           }
-        })
-        .transform(response);
+        });
     }
-    return env.ASSETS.fetch(request);
+
+    return rewriter.transform(response);
   }
 };
 
