@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Recipe Ingredient Scaler by Family Size | Family Meal Planning Tools</title>
+  <meta name="description" content="Paste a recipe URL, extract its ingredient list, and scale the quantities for your family size. Add the scaled recipe directly to your weekly meal planner and grocery list.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://familymealplanningtools.com/recipe-scaler.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Family Meal Planning Tools">
+  <meta property="og:title" content="Recipe Ingredient Scaler by Family Size">
+  <meta property="og:description" content="Paste a recipe URL and automatically scale its ingredients for your household.">
+  <meta property="og:url" content="https://familymealplanningtools.com/recipe-scaler.html">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Recipe Ingredient Scaler","url":"https://familymealplanningtools.com/recipe-scaler.html","applicationCategory":"LifestyleApplication","operatingSystem":"Any","description":"Extracts recipe ingredients from a public recipe URL and scales ingredient quantities for a selected family size."}</script>
+  <style>
+    :root{--ink:#183128;--muted:#66756d;--bg:#f7f4ec;--card:#fff;--green:#315849;--lite:#e8f0eb;--line:#dedfd8;--danger:#8d3434}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font:16px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}.wrap{width:min(1060px,93%);margin:auto}a{color:var(--green)}.topbar{background:var(--ink);color:#fff;text-align:center;padding:.65rem}.topbar a{color:#ffdb8b;font-weight:800}.nav{display:flex;justify-content:space-between;align-items:center;padding:1rem 0;gap:1rem}.brand{font-weight:900}.nav a{text-decoration:none;font-weight:800}.hero{padding:3.2rem 0 1.5rem}.hero h1{font-size:clamp(2.5rem,6vw,4.8rem);line-height:.98;letter-spacing:-.055em;margin:.5rem 0 1rem}.hero p{font-size:1.08rem;color:var(--muted);max-width:780px}.eyebrow{font-size:.78rem;letter-spacing:.07em;font-weight:900;color:var(--green)}.tool{display:grid;grid-template-columns:1.45fr .55fr;gap:1rem;margin:1rem 0 2.5rem}.panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:1.15rem}.field{margin-bottom:.9rem}.field label{display:block;font-size:.82rem;font-weight:850;margin-bottom:.3rem}.field input,.field select{width:100%;border:1px solid #cbd2cd;border-radius:10px;padding:.75rem;background:#fff}.url-row{display:grid;grid-template-columns:1fr auto;gap:.55rem}.btn,.btn2{border:0;border-radius:10px;padding:.78rem 1rem;font-weight:850;cursor:pointer}.btn{background:var(--green);color:#fff}.btn2{background:var(--lite);color:var(--green)}.btn:disabled,.btn2:disabled{opacity:.55;cursor:not-allowed}.hint{font-size:.82rem;color:var(--muted)}.status{padding:.8rem;border-radius:10px;background:var(--lite);color:var(--green);margin-top:.8rem}.status.error{background:#fff0f0;color:var(--danger)}.hidden{display:none!important}.recipe-head{display:flex;justify-content:space-between;gap:1rem;align-items:start;margin-bottom:.9rem}.recipe-head h2{margin:.1rem 0}.source{font-size:.82rem;color:var(--muted);overflow-wrap:anywhere}.scale-grid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin:1rem 0}.ingredients{display:flex;flex-direction:column;gap:.5rem;margin-top:1rem}.ingredient{display:grid;grid-template-columns:auto 1fr;gap:.65rem;align-items:start;border:1px solid #edf0ed;border-radius:11px;padding:.65rem}.ingredient input{margin-top:.3rem}.ingredient .original{font-size:.79rem;color:var(--muted);margin-top:.15rem}.ingredient strong{font-weight:780}.actions{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem}.aside h3{margin-top:.1rem}.aside ul{padding-left:1.15rem}.aside li{margin:.45rem 0}.note{background:#fff8df;border:1px solid #e9d995;border-radius:12px;padding:.8rem;font-size:.86rem}.faq{padding:2rem 0}.faq h2{font-size:2rem}.faq article{background:#fff;border:1px solid var(--line);border-radius:14px;padding:1rem;margin:.7rem 0}footer{padding:2rem 0 3rem;text-align:center;color:var(--muted);font-size:.88rem}@media(max-width:780px){.tool{grid-template-columns:1fr}.url-row{grid-template-columns:1fr}.scale-grid{grid-template-columns:1fr}.nav{align-items:flex-start;flex-direction:column}}@media print{.topbar,.nav,.hero,.aside,.url-form,.actions,.faq,footer{display:none!important}body{background:#fff}.tool{display:block}.panel{border:0;padding:0}.ingredient{break-inside:avoid}}
+  </style>
+</head>
+<body>
+  <div class="topbar">Free meal-planning tool · <a href="/">Back to the weekly planner →</a></div>
+  <div class="wrap nav"><div class="brand">Family Meal Planning Tools</div><a href="/">Weekly Meal Planner</a></div>
+
+  <header class="hero"><div class="wrap"><div class="eyebrow">FREE RECIPE URL TOOL</div><h1>Paste a recipe. Scale it for your family.</h1><p>Paste the URL of a public recipe page. We’ll look for the recipe’s published ingredient data, show the original quantities, and scale measurable amounts for the number of people you need to feed.</p></div></header>
+
+  <main class="wrap">
+    <div class="tool">
+      <section class="panel">
+        <div class="url-form">
+          <div class="field"><label for="recipeUrl">Recipe URL</label><div class="url-row"><input id="recipeUrl" type="url" inputmode="url" placeholder="https://example.com/chicken-tacos" autocomplete="url"><button id="importBtn" class="btn">Find Ingredients</button></div><div class="hint">Works best with direct recipe pages that publish standard Recipe structured data.</div></div>
+          <div id="status" class="status hidden" role="status"></div>
+        </div>
+
+        <div id="recipeResult" class="hidden">
+          <div class="recipe-head"><div><h2 id="recipeName">Imported recipe</h2><div id="recipeSource" class="source"></div></div></div>
+          <div class="scale-grid">
+            <div class="field"><label for="sourceServings">Original recipe servings</label><input id="sourceServings" type="number" min="0.25" max="100" step="0.25" value="4"><div class="hint">Edit this if the recipe page did not state its serving yield correctly.</div></div>
+            <div class="field"><label for="targetServings">Your family size / target servings</label><input id="targetServings" type="number" min="1" max="30" step="1" value="4"></div>
+          </div>
+          <div><strong>Scaled ingredients</strong><div class="hint">Quantities without a measurable number, such as “salt to taste,” are kept unchanged.</div></div>
+          <div id="ingredients" class="ingredients"></div>
+          <div class="actions"><button id="copyBtn" class="btn2">Copy Ingredients</button><button id="printBtn" class="btn2">Print</button><select id="plannerDay" aria-label="Meal planner day"><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option></select><button id="plannerBtn" class="btn">Add to Meal Planner</button></div>
+        </div>
+      </section>
+
+      <aside class="panel aside"><h3>What this tool does</h3><ul><li>Reads public Recipe JSON-LD when the source site provides it.</li><li>Detects the recipe’s serving yield when available.</li><li>Scales common whole numbers, decimals, fractions, mixed fractions, and quantity ranges.</li><li>Lets you correct the original serving count before scaling.</li><li>Adds the imported recipe to a selected day in the weekly planner.</li></ul><div class="note"><strong>Important:</strong> Ingredient scaling is mathematical, not culinary judgment. Baking recipes, spices, thickeners, cooking times, pan sizes, and some sauces may not scale perfectly linearly. Review the result before cooking.</div></aside>
+    </div>
+
+    <section class="faq"><h2>Recipe scaling help</h2><article><strong>Why can’t every recipe URL be imported?</strong><p>Some recipe sites do not publish their ingredients as standard structured data, block automated requests, require a login, or build the recipe entirely in the browser. In those cases the importer may not be able to read the recipe.</p></article><article><strong>Does the tool copy the whole recipe?</strong><p>No. It extracts the ingredient list and basic recipe name/yield needed for scaling. The original recipe page remains the source for instructions, photos, notes, and preparation details.</p></article><article><strong>Can I add the result to my grocery list?</strong><p>Yes. Choose a day and use “Add to Meal Planner.” The scaled ingredients are saved into the same browser-based meal plan used by the weekly planner.</p></article></section>
+  </main>
+
+  <footer>© 2026 Family Meal Planning Tools · <a href="/">Meal planner</a> · <a href="/grocery-list-planning.html">Grocery list guide</a></footer>
+  <script src="recipe-scaler.js"></script>
+</body>
+</html>
