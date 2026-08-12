@@ -36,7 +36,7 @@ async function extractRecipeRequest(request) {
     const { html, finalUrl } = await fetchHtml(target);
     const recipe = extractRecipeFromHtml(html);
     if (!recipe) {
-      return json({ error: 'No structured recipe data was found on that page. Try the direct recipe page rather than a homepage, search page, or social-media link.' }, 422);
+      return json({ error: 'No recipe ingredient list was found on that page. Try the direct recipe page rather than a homepage, search page, or social-media link.' }, 422);
     }
 
     const ingredients = normalizeIngredients(recipe.recipeIngredient || recipe.ingredients);
@@ -47,7 +47,8 @@ async function extractRecipeRequest(request) {
       sourceUrl: finalUrl,
       recipeYield: normalizeYield(recipe.recipeYield),
       servings: parseServings(recipe.recipeYield),
-      ingredients: ingredients.slice(0, 100)
+      ingredients: ingredients.slice(0, 100),
+      extractionMethod: recipe.__fallback ? 'visible-html' : 'structured-data'
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unable to import that recipe.';
@@ -79,7 +80,7 @@ async function fetchHtml(initialUrl) {
       redirect: 'manual',
       headers: {
         'Accept': 'text/html,application/xhtml+xml;q=0.9,*/*;q=0.1',
-        'User-Agent': 'FamilyMealPlanningToolsRecipeImporter/1.0 (+https://familymealplanningtools.com/recipe-scaler.html)'
+        'User-Agent': 'FamilyMealPlanningToolsRecipeImporter/1.1 (+https://familymealplanningtools.com/recipe-scaler.html)'
       }
     });
 
@@ -137,7 +138,9 @@ function extractRecipeFromHtml(html) {
       const parsed = JSON.parse(raw);
       const recipe = findRecipeNode(parsed);
       if (recipe) return recipe;
-    } catch {}
+    } catch {
+      // Some sites emit malformed JSON-LD. Continue to fallbacks.
+    }
   }
 
   const ingredientMatch = html.match(/["']recipeIngredient["']\s*:\s*(\[[\s\S]{1,100000}?\])/i);
@@ -147,7 +150,73 @@ function extractRecipeFromHtml(html) {
       return { name: extractTitle(html), recipeIngredient: ingredients };
     } catch {}
   }
+
+  return extractRecipeFromVisibleHtml(html);
+}
+
+function extractRecipeFromVisibleHtml(html) {
+  const safeHtml = String(html || '').replace(/<script\b[\s\S]*?<\/script>/gi, ' ').replace(/<style\b[\s\S]*?<\/style>/gi, ' ');
+  const headingRe = /<h([1-6])\b[^>]*>([\s\S]*?)<\/h\1>/gi;
+  let match;
+  let ingredientHeadingEnd = -1;
+  while ((match = headingRe.exec(safeHtml))) {
+    const headingText = cleanText(decodeBasicEntities(stripTags(match[2]))).toLowerCase();
+    if (/^ingredients?\b/.test(headingText)) {
+      ingredientHeadingEnd = headingRe.lastIndex;
+      break;
+    }
+  }
+  if (ingredientHeadingEnd < 0) return null;
+
+  const afterHeading = safeHtml.slice(ingredientHeadingEnd);
+  const nextHeadingIndex = afterHeading.search(/<h[1-6]\b/i);
+  const ingredientSection = nextHeadingIndex >= 0 ? afterHeading.slice(0, nextHeadingIndex) : afterHeading.slice(0, 120000);
+
+  let ingredients = [];
+  const list = ingredientSection.match(/<(ul|ol)\b[^>]*>([\s\S]*?)<\/\1>/i);
+  if (list) {
+    ingredients = [...list[2].matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/gi)]
+      .map(item => cleanText(decodeBasicEntities(stripTags(item[1]))))
+      .filter(Boolean);
+  }
+
+  if (!ingredients.length) {
+    const textSection = htmlToText(ingredientSection);
+    ingredients = textSection.split(/\n+/).map(cleanText).filter(line => /^(?:[-•*]\s*)?(?:\d|[¼½¾⅓⅔⅛⅜⅝⅞]|optional\b)/i.test(line)).map(line => line.replace(/^[-•*]\s*/, ''));
+  }
+  if (!ingredients.length) return null;
+
+  const preIngredientsText = htmlToText(safeHtml.slice(0, ingredientHeadingEnd));
+  const servings = parseVisibleServings(preIngredientsText);
+
+  return {
+    __fallback: true,
+    name: extractHeadingTitle(safeHtml) || extractTitle(safeHtml),
+    recipeYield: servings ? `${servings} servings` : null,
+    recipeIngredient: ingredients
+  };
+}
+
+function parseVisibleServings(text) {
+  const normalized = cleanText(text);
+  const patterns = [
+    /\bservings?\s*[:\-]?\s*(\d+(?:\.\d+)?)/i,
+    /\bserves\s+(\d+(?:\.\d+)?)/i,
+    /\byield\s*[:\-]?\s*(\d+(?:\.\d+)?)\s*(?:servings?|people|persons?)?/i
+  ];
+  for (const pattern of patterns) {
+    const match = normalized.match(pattern);
+    if (match) {
+      const value = Number(match[1]);
+      if (Number.isFinite(value) && value > 0 && value <= 100) return value;
+    }
+  }
   return null;
+}
+
+function extractHeadingTitle(html) {
+  const h1 = html.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i);
+  return h1 ? cleanText(decodeBasicEntities(stripTags(h1[1]))) : '';
 }
 
 function findRecipeNode(node) {
@@ -201,18 +270,35 @@ function extractTitle(html) {
   const og = html.match(/<meta\b[^>]*property=["']og:title["'][^>]*content=["']([^"']+)["'][^>]*>/i) || html.match(/<meta\b[^>]*content=["']([^"']+)["'][^>]*property=["']og:title["'][^>]*>/i);
   if (og) return cleanText(decodeBasicEntities(og[1]));
   const title = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
-  return title ? cleanText(decodeBasicEntities(title[1])) : '';
+  return title ? cleanText(decodeBasicEntities(stripTags(title[1]))) : '';
+}
+
+function stripTags(value) {
+  return String(value || '').replace(/<[^>]*>/g, ' ');
+}
+
+function htmlToText(value) {
+  return decodeBasicEntities(String(value || '')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p\s*>/gi, '\n')
+    .replace(/<\/li\s*>/gi, '\n')
+    .replace(/<[^>]*>/g, ' '))
+    .replace(/[\t ]+/g, ' ')
+    .replace(/\s*\n\s*/g, '\n')
+    .trim();
 }
 
 function decodeBasicEntities(text) {
   return String(text || '')
-    .replace(/&quot;/g, '"')
+    .replace(/&quot;/gi, '"')
     .replace(/&#34;/g, '"')
-    .replace(/&apos;/g, "'")
+    .replace(/&apos;/gi, "'")
     .replace(/&#39;/g, "'")
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>');
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&#160;/g, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>');
 }
 
 function cleanText(value) {
