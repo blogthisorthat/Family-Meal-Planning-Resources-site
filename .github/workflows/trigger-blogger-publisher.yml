@@ -6,7 +6,6 @@ on:
       - main
     paths:
       - blogger-publisher/queue/current.json
-      - .github/workflows/trigger-blogger-publisher.yml
 
 permissions:
   contents: read
