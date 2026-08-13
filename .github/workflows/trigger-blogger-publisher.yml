@@ -9,45 +9,14 @@ on:
       - .github/workflows/trigger-blogger-publisher.yml
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 4
+    timeout-minutes: 3
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-
-      - name: Queue Tuscan chicken if needed
-        id: queue
-        shell: bash
-        run: |
-          set -euo pipefail
-          target='recipe-2026-08-13-creamy-garlic-tuscan-chicken'
-          current="$(python3 -c 'import json; print(json.load(open("blogger-publisher/queue/current.json")).get("queueId", ""))')"
-          if [ "$current" != "$target" ]; then
-            curl --fail --silent --show-error --location \
-              'https://api.github.com/repos/blogthisorthat/Family-Meal-Planning-Resources-site/git/blobs/6f1f02db76d9769a73f901ca8d9ba8f4ea7dd59e' \
-              -o /tmp/blob.json
-            python3 - <<'PY'
-          import base64, json
-          data = json.load(open('/tmp/blob.json'))
-          open('blogger-publisher/queue/current.json','wb').write(base64.b64decode(data['content']))
-          PY
-            git config user.name 'blogthisorthat'
-            git config user.email 'conradrensch1@gmail.com'
-            git add blogger-publisher/queue/current.json
-            git commit -m 'Queue creamy garlic Tuscan chicken with photorealistic image'
-            git push
-            echo 'queued=true' >> "$GITHUB_OUTPUT"
-          else
-            echo 'queued=false' >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Trigger publisher and verify live image
-        if: steps.queue.outputs.queued == 'false'
+      - name: Trigger current Cloudflare publisher and verify live post
         shell: bash
         run: |
           set -euo pipefail
