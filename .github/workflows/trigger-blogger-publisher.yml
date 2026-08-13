@@ -1,0 +1,24 @@
+name: Trigger Blogger Publisher
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - blogger-publisher/queue/current.json
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Trigger current Cloudflare publisher
+        shell: bash
+        run: |
+          set -euo pipefail
+          response="$(curl --fail --silent --show-error --location --max-time 30 'https://steep-math-9b6b.conradrensch1.workers.dev/run')"
+          echo "$response"
+          echo "$response" | grep -q '"ok"[[:space:]]*:[[:space:]]*true'
