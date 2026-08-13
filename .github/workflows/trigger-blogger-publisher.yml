@@ -13,12 +13,35 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 2
+    timeout-minutes: 3
     steps:
-      - name: Trigger current Cloudflare publisher
+      - name: Trigger current Cloudflare publisher and verify live post
         shell: bash
         run: |
           set -euo pipefail
+
           response="$(curl --fail --silent --show-error --location --max-time 30 'https://steep-math-9b6b.conradrensch1.workers.dev/run')"
           echo "$response"
           echo "$response" | grep -q '"ok"[[:space:]]*:[[:space:]]*true'
+
+          post_url="$(printf '%s' "$response" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("url", ""))')"
+          if [ -z "$post_url" ]; then
+            echo 'Publisher did not return a post URL.' >&2
+            exit 1
+          fi
+
+          queue_json="$(curl --fail --silent --show-error --location --max-time 30 'https://raw.githubusercontent.com/blogthisorthat/Family-Meal-Planning-Resources-site/main/blogger-publisher/queue/current.json')"
+          image_url="$(printf '%s' "$queue_json" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("imageUrl", ""))')"
+          if [ -z "$image_url" ]; then
+            echo 'Queue does not contain imageUrl.' >&2
+            exit 1
+          fi
+
+          curl --fail --silent --show-error --location --max-time 30 -o /tmp/post.html "$post_url"
+          grep -Fq "$image_url" /tmp/post.html
+          curl --fail --silent --show-error --location --max-time 30 -o /tmp/recipe-image "$image_url"
+          test -s /tmp/recipe-image
+
+          echo "VERIFIED_POST_URL=$post_url"
+          echo "VERIFIED_IMAGE_URL=$image_url"
+          echo 'Live Blogger page contains the queued recipe image URL and the image asset is reachable.'
