@@ -71,3 +71,5 @@ jobs:
           file /tmp/recipe-image.jpg | grep -q 'JPEG image data'
           echo "VERIFIED_POST_URL=$post_url"
           echo "VERIFIED_REAL_JPEG=$image_url"
+
+# publish-now-20260813
