@@ -6,70 +6,52 @@ on:
       - main
     paths:
       - blogger-publisher/queue/current.json
-      - .github/workflows/trigger-blogger-publisher.yml
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     timeout-minutes: 4
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-
-      - name: Queue baked ziti if needed
-        id: queue
+      - name: Trigger publisher and verify recipe image
         shell: bash
         run: |
           set -euo pipefail
-          target='recipe-2026-08-13-baked-ziti-beef-three-cheese'
-          current="$(python3 -c 'import json; print(json.load(open("blogger-publisher/queue/current.json")).get("queueId", ""))')"
-          if [ "$current" != "$target" ]; then
-            cat > blogger-publisher/queue/current.json <<'JSON'
-          {
-            "enabled": true,
-            "queueId": "recipe-2026-08-13-baked-ziti-beef-three-cheese",
-            "blog": "cooking",
-            "title": "Easy Baked Ziti with Beef and Three Cheeses (Family Dinner)",
-            "imageRequired": true,
-            "imageStatus": "ready",
-            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/8/82/BakedZiti_2025-12-04.jpg",
-            "imageType": "image/jpeg",
-            "publishRequestedAt": "2026-08-13T20:10:00Z",
-            "contentHtml": "<p><img src=\"https://upload.wikimedia.org/wikipedia/commons/8/82/BakedZiti_2025-12-04.jpg\" alt=\"Freshly baked ziti covered with browned melted cheese and chopped parsley in a large baking pan\" style=\"width:100%;max-width:1000px;height:auto;border-radius:14px;display:block;margin:0 auto 20px auto;\"></p><p><strong>This baked ziti is the kind of family dinner that makes a full 9x13 pan, feeds a crowd, and gives you leftovers without requiring restaurant-level skills.</strong> Ziti pasta, beefy marinara, ricotta, mozzarella, and Parmesan bake together under a golden, bubbly cheese layer.</p><p><strong>Servings:</strong> 8 &nbsp;|&nbsp; <strong>Prep:</strong> 20 minutes &nbsp;|&nbsp; <strong>Bake:</strong> 30 minutes &nbsp;|&nbsp; <strong>Total:</strong> about 50 minutes</p><h2>Why This Dinner Works</h2><ul><li><strong>Feeds everybody:</strong> one big pan makes eight solid servings.</li><li><strong>Easy ingredients:</strong> pasta, jarred marinara, ground beef, and three cheeses.</li><li><strong>Make-ahead friendly:</strong> assemble it earlier, refrigerate, and bake when dinner time hits.</li><li><strong>Leftovers are excellent:</strong> this is one of those meals that might be even better the next day.</li></ul><h2>Ingredients</h2><ul><li>1 pound ziti pasta</li><li>1 pound lean ground beef</li><li>1 small yellow onion, diced</li><li>4 cloves garlic, minced</li><li>1 tablespoon olive oil</li><li>1 teaspoon Italian seasoning</li><li>1/2 teaspoon kosher salt</li><li>1/2 teaspoon black pepper</li><li>1 jar marinara sauce, 24 ounces</li><li>1 can crushed tomatoes, 15 ounces</li><li>15 ounces whole-milk ricotta cheese</li><li>3 cups shredded mozzarella cheese, divided</li><li>3/4 cup grated Parmesan cheese, divided</li><li>1 large egg</li><li>2 tablespoons chopped fresh parsley, plus more for the top</li></ul><h2>Instructions</h2><ol><li><strong>Heat the oven.</strong> Preheat the oven to 375°F. Lightly grease a 9x13-inch baking dish.</li><li><strong>Cook the pasta.</strong> Boil the ziti in salted water until it is about 2 minutes shy of fully tender. Drain it. Do not overcook it now because it finishes in the oven.</li><li><strong>Brown the beef.</strong> While the pasta cooks, heat olive oil in a large skillet over medium-high heat. Add the beef and onion. Cook until the beef is browned and the onion is soft, about 6 to 8 minutes. Drain excess grease if needed.</li><li><strong>Make the sauce.</strong> Add the garlic, Italian seasoning, salt, and pepper. Cook 30 seconds. Stir in the marinara and crushed tomatoes, then simmer for about 5 minutes.</li><li><strong>Mix the cheese filling.</strong> In a bowl, stir together the ricotta, egg, 1 cup mozzarella, 1/2 cup Parmesan, and parsley.</li><li><strong>Combine.</strong> Toss the drained ziti with about two-thirds of the meat sauce.</li><li><strong>Layer the pan.</strong> Spread a thin layer of sauce in the baking dish. Add half the pasta, spoon the ricotta mixture over it in dollops, then add the rest of the pasta. Pour the remaining sauce over the top.</li><li><strong>Cheese it.</strong> Cover the entire top with the remaining 2 cups mozzarella and 1/4 cup Parmesan.</li><li><strong>Bake.</strong> Bake uncovered for 25 to 30 minutes, until the sauce is bubbling and the cheese is melted with golden-brown spots.</li><li><strong>Rest.</strong> Let the pan sit for 10 minutes before serving. Sprinkle with extra parsley.</li></ol><h2>Dad-Proof Tips</h2><ul><li>Undercook the pasta slightly before baking. Mushy pasta is the one thing this casserole cannot hide.</li><li>Do not worry about making perfect ricotta layers. Spoonfuls scattered around the pan work just fine.</li><li>If your family likes extra sauce, keep a second jar of marinara warm for the table.</li><li>That 10-minute rest at the end matters. Cut it immediately and the first serving will try to escape across the plate.</li></ul><h2>Easy Swaps</h2><ul><li>Use Italian sausage instead of ground beef.</li><li>Leave the meat out for a vegetarian baked ziti.</li><li>Use penne or rigatoni if the grocery store is somehow completely out of ziti.</li><li>Add chopped spinach to the ricotta mixture if you want an easy vegetable built into the casserole.</li></ul><h2>Meal Planning</h2><p>Need a smaller pan or feeding even more people? Use the <a href=\"https://familymealplanningtools.com/recipe-scaler.html\"><strong>Family Meal Planning Tools Recipe Scaler</strong></a> to resize the ingredient quantities for your household.</p><p>Use <a href=\"https://familymealplanningtools.com/\"><strong>Family Meal Planning Tools</strong></a> to plug this into a weekly dinner plan and build your grocery list.</p><h2>Storage and Reheating</h2><p>Cover leftovers and refrigerate for up to 4 days. Reheat individual servings in the microwave or cover a larger portion with foil and warm it in a 350°F oven until hot.</p><p><small>Food photo: SpencerWMartin, Wikimedia Commons, CC0 public-domain dedication. <a href=\"https://commons.wikimedia.org/wiki/File:BakedZiti_2025-12-04.jpg\">Image source</a>.</small></p>",
-            "labels": ["Easy Dinner", "Family Meals", "Pasta Recipes", "Baked Ziti", "Casseroles", "Meal Planning"]
-          }
-          JSON
-            git config user.name 'blogthisorthat'
-            git config user.email 'conradrensch1@gmail.com'
-            git add blogger-publisher/queue/current.json
-            git commit -m 'Queue baked ziti with real JPEG food photo'
-            git push
-            echo 'queued=true' >> "$GITHUB_OUTPUT"
-          else
-            echo 'queued=false' >> "$GITHUB_OUTPUT"
+
+          queue_json="$(curl --fail --silent --show-error --location --max-time 30 'https://raw.githubusercontent.com/blogthisorthat/Family-Meal-Planning-Resources-site/main/blogger-publisher/queue/current.json')"
+          image_url="$(printf '%s' "$queue_json" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("imageUrl", ""))')"
+          image_type="$(printf '%s' "$queue_json" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("imageType", ""))')"
+
+          test -n "$image_url"
+
+          case "$image_url" in
+            *.jpg|*.jpeg|*.png|*.webp) ;;
+            *) echo 'Recipe image must be a raster JPG, JPEG, PNG, or WEBP URL.' >&2; exit 1 ;;
+          esac
+
+          if [ -n "$image_type" ]; then
+            case "$image_type" in
+              image/jpeg|image/png|image/webp) ;;
+              *) echo "Unsupported imageType: $image_type" >&2; exit 1 ;;
+            esac
           fi
 
-      - name: Trigger publisher and verify real JPEG
-        if: steps.queue.outputs.queued == 'false'
-        shell: bash
-        run: |
-          set -euo pipefail
           response="$(curl --fail --silent --show-error --location --max-time 30 'https://steep-math-9b6b.conradrensch1.workers.dev/run')"
           echo "$response"
           echo "$response" | grep -q '"ok"[[:space:]]*:[[:space:]]*true'
+
           post_url="$(printf '%s' "$response" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("url", ""))')"
           test -n "$post_url"
-          image_url='https://upload.wikimedia.org/wikipedia/commons/8/82/BakedZiti_2025-12-04.jpg'
+
           curl --fail --silent --show-error --location --max-time 30 -o /tmp/post.html "$post_url"
           grep -Fq "$image_url" /tmp/post.html
-          curl --fail --silent --show-error --location --max-time 30 -o /tmp/recipe-image.jpg "$image_url"
-          test -s /tmp/recipe-image.jpg
-          file /tmp/recipe-image.jpg | grep -q 'JPEG image data'
-          echo "VERIFIED_POST_URL=$post_url"
-          echo "VERIFIED_REAL_JPEG=$image_url"
 
-# publish-now-20260813
+          curl --fail --silent --show-error --location --retry 4 --retry-all-errors --retry-delay 2 --max-time 45 \
+            -A 'Mozilla/5.0 (compatible; TheManThatCooksImageCheck/1.0)' \
+            -o /tmp/recipe-image "$image_url"
+          test -s /tmp/recipe-image
+
+          echo "VERIFIED_POST_URL=$post_url"
+          echo "VERIFIED_IMAGE_URL=$image_url"
