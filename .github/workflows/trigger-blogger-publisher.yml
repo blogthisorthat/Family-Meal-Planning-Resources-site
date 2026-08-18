@@ -22,6 +22,7 @@ jobs:
     timeout-minutes: 12
     env:
       QUEUE_PATH: blogger-publisher/queue/current.json
+      PUBLISH_STATE_PATH: blogger-publisher/state/last-publish.json
       WORKER_BASE: https://steep-math-9b6b.conradrensch1.workers.dev
       R2_PUBLIC_BASE: https://pub-343f7a8e174e49de9b9c66bc76af0229.r2.dev
       PUBLISH_BRANCH: main
@@ -29,7 +30,7 @@ jobs:
 
     steps:
       - name: Check out the publishing repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
@@ -120,6 +121,64 @@ jobs:
         run: |
           set -euo pipefail
           python3 blogger-publisher/publisher_pipeline.py publish
+
+      - name: Record the latest publishing result
+        if: always()
+        shell: bash
+        env:
+          STEP_OUTCOME: ${{ steps.publish.outcome }}
+          QUEUE_ID: ${{ steps.prepare.outputs.queue_id }}
+          IMAGE_URL: ${{ steps.prepare.outputs.image_url }}
+          IMAGE_STORAGE: ${{ steps.prepare.outputs.image_storage }}
+          PUBLISH_ACTION: ${{ steps.publish.outputs.publish_action }}
+          POST_URL: ${{ steps.publish.outputs.post_url }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$(dirname "$PUBLISH_STATE_PATH")"
+          python3 - <<'PY'
+          import datetime as dt
+          import json
+          import os
+          from pathlib import Path
+
+          queue_path = Path(os.environ['QUEUE_PATH'])
+          queue = json.loads(queue_path.read_text(encoding='utf-8'))
+          outcome = os.environ.get('STEP_OUTCOME', '')
+          action = os.environ.get('PUBLISH_ACTION', '')
+          state = {
+              'recordedAt': dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00', 'Z'),
+              'ok': outcome == 'success',
+              'workflowOutcome': outcome or 'not-run',
+              'queueId': os.environ.get('QUEUE_ID') or queue.get('queueId'),
+              'title': queue.get('title'),
+              'primarySeoTarget': queue.get('primarySeoTarget'),
+              'publishAction': action or 'none',
+              'postUrl': os.environ.get('POST_URL') or None,
+              'imageUrl': os.environ.get('IMAGE_URL') or queue.get('imageUrl'),
+              'imageStorage': os.environ.get('IMAGE_STORAGE') or queue.get('imageStorage'),
+              'imageStatus': queue.get('imageStatus'),
+          }
+          Path(os.environ['PUBLISH_STATE_PATH']).write_text(
+              json.dumps(state, indent=2, ensure_ascii=False) + '\n', encoding='utf-8'
+          )
+          PY
+
+      - name: Commit the publishing result for verification
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -f "$PUBLISH_STATE_PATH" ]; then
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add "$PUBLISH_STATE_PATH"
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "Record Blogger publishing result [skip ci]"
+          git push origin HEAD:main
 
       - name: Publishing summary
         if: always()
