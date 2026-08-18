@@ -1,13 +1,13 @@
 {
-  "recordedAt": "2026-08-18T19:43:24Z",
+  "recordedAt": "2026-08-18T19:43:55Z",
   "ok": true,
   "workflowOutcome": "success",
-  "queueId": "recipe-2026-08-18-creamy-cajun-chicken-sausage-pasta-test",
-  "title": "Creamy Cajun Chicken and Sausage Pasta (Easy 40-Minute Dinner)",
-  "primarySeoTarget": "creamy Cajun chicken and sausage pasta",
-  "publishAction": "none",
-  "postUrl": "https://themanthatcookssometimes.blogspot.com/2026/08/creamy-cajun-chicken-and-sausage-pasta.html",
-  "imageUrl": "https://raw.githubusercontent.com/blogthisorthat/Family-Meal-Planning-Resources-site/main/blogger-publisher/images/recipe-2026-08-18-creamy-cajun-chicken-sausage-pasta-test.jpg",
-  "imageStorage": "github-raw-fallback",
+  "queueId": "recipe-2026-08-18-one-pan-cheesy-beef-penne-skillet-001",
+  "title": "Easy One-Pan Cheesy Beef Penne Skillet (35-Minute Dinner)",
+  "primarySeoTarget": "one pan cheesy beef penne skillet",
+  "publishAction": "published",
+  "postUrl": "https://themanthatcookssometimes.blogspot.com/2026/08/easy-one-pan-cheesy-beef-penne-skillet.html",
+  "imageUrl": "https://raw.githubusercontent.com/blogthisorthat/Family-Meal-Planning-Resources-site/main/blogger-publisher/images/recipe-2026-08-18-one-pan-cheesy-beef-penne-skillet-001.jpg",
+  "imageStorage": "github-raw",
   "imageStatus": "ready"
 }
