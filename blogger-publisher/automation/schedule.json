@@ -1,0 +1,36 @@
+{
+  "version": 2,
+  "taskId": "6a7cb2daee608191980213ea189976bd",
+  "title": "Man That Cooks",
+  "intendedEnabled": true,
+  "generationSchedule": {
+    "frequency": "daily",
+    "localTime": "08:00",
+    "timezone": "America/New_York"
+  },
+  "canonicalPromptPath": "blogger-publisher/automation/daily-recipe-prompt.md",
+  "publishing": {
+    "queuePath": "blogger-publisher/queue/current.json",
+    "statePath": "blogger-publisher/state/last-publish.json",
+    "workflowPath": ".github/workflows/trigger-blogger-publisher.yml",
+    "imageDirectory": "blogger-publisher/images",
+    "imageStorage": "github-raw",
+    "bloggerTransport": "direct Blogger API",
+    "emailToPost": false
+  },
+  "publisherSafetyNet": {
+    "frequency": "daily",
+    "localTime": "08:00",
+    "timezone": "America/New_York",
+    "purpose": "Retry or verify the current ready queue item; push events remain the primary publisher trigger."
+  },
+  "test": {
+    "queueId": "recipe-2026-08-18-creamy-cajun-chicken-sausage-pasta-test",
+    "title": "Creamy Cajun Chicken and Sausage Pasta (Easy 40-Minute Dinner)",
+    "primarySeoTarget": "creamy Cajun chicken and sausage pasta",
+    "imagePath": "blogger-publisher/images/recipe-2026-08-18-creamy-cajun-chicken-sausage-pasta-test.jpg",
+    "resultStatePath": "blogger-publisher/state/last-publish.json"
+  },
+  "updatedAt": "2026-08-18T18:00:00Z",
+  "controllerNote": "This manifest is the repository source of truth for the ChatGPT scheduled prompt. Activation of the external ChatGPT task still requires the task controller to apply intendedEnabled and the generation schedule."
+}
