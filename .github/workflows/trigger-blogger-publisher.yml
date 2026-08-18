@@ -6,52 +6,88 @@ on:
       - main
     paths:
       - blogger-publisher/queue/current.json
+      - blogger-publisher/staging/**
+  workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
+
+concurrency:
+  group: man-that-cooks-blogger-publisher
+  cancel-in-progress: false
 
 jobs:
   publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 4
+    timeout-minutes: 10
+    env:
+      QUEUE_PATH: blogger-publisher/queue/current.json
+      WORKER_BASE: https://steep-math-9b6b.conradrensch1.workers.dev
+      R2_PUBLIC_BASE: https://pub-343f7a8e174e49de9b9c66bc76af0229.r2.dev
+      PUBLISH_BRANCH: main
+      PUBLISH_API_KEY: ${{ secrets.PUBLISH_API_KEY }}
+
     steps:
-      - name: Trigger publisher and verify recipe image
+      - name: Check out the publishing repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+
+      - name: Validate and prepare the generated recipe image
+        id: prepare
         shell: bash
         run: |
           set -euo pipefail
+          python3 blogger-publisher/publisher_pipeline.py prepare
 
-          queue_json="$(curl --fail --silent --show-error --location --max-time 30 'https://raw.githubusercontent.com/blogthisorthat/Family-Meal-Planning-Resources-site/main/blogger-publisher/queue/current.json')"
-          image_url="$(printf '%s' "$queue_json" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("imageUrl", ""))')"
-          image_type="$(printf '%s' "$queue_json" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("imageType", ""))')"
+      - name: Commit the ready queue after image verification
+        if: steps.prepare.outputs.queue_changed == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add blogger-publisher/queue/current.json
+          git commit -m "Prepare generated recipe image and enable Blogger queue [skip ci]"
+          git push origin HEAD:main
 
-          test -n "$image_url"
+      - name: Wait for the updated queue to be publicly readable
+        if: steps.prepare.outputs.queue_changed == 'true'
+        shell: bash
+        env:
+          EXPECTED_QUEUE_ID: ${{ steps.prepare.outputs.queue_id }}
+          EXPECTED_IMAGE_URL: ${{ steps.prepare.outputs.image_url }}
+        run: |
+          set -euo pipefail
+          queue_url='https://raw.githubusercontent.com/blogthisorthat/Family-Meal-Planning-Resources-site/main/blogger-publisher/queue/current.json'
+          for attempt in $(seq 1 12); do
+            remote="$(curl --fail --silent --show-error --location --max-time 30 "${queue_url}?t=$(date +%s)-${attempt}" || true)"
+            if [ -n "$remote" ] && printf '%s' "$remote" | python3 -c 'import json,os,sys; item=json.load(sys.stdin); ok=(item.get("queueId")==os.environ["EXPECTED_QUEUE_ID"] and item.get("imageUrl")==os.environ["EXPECTED_IMAGE_URL"] and item.get("imageStatus")=="ready" and item.get("enabled") is True); raise SystemExit(0 if ok else 1)'; then
+              echo 'Updated queue is live.'
+              exit 0
+            fi
+            sleep $((attempt * 2))
+          done
+          echo 'Updated queue did not become publicly readable in time.' >&2
+          exit 1
 
-          case "$image_url" in
-            *.jpg|*.jpeg|*.png|*.webp) ;;
-            *) echo 'Recipe image must be a raster JPG, JPEG, PNG, or WEBP URL.' >&2; exit 1 ;;
-          esac
+      - name: Publish through the Cloudflare Worker and verify the result
+        id: publish
+        if: steps.prepare.outputs.enabled == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 blogger-publisher/publisher_pipeline.py publish
 
-          if [ -n "$image_type" ]; then
-            case "$image_type" in
-              image/jpeg|image/png|image/webp) ;;
-              *) echo "Unsupported imageType: $image_type" >&2; exit 1 ;;
-            esac
-          fi
-
-          response="$(curl --fail --silent --show-error --location --max-time 30 'https://steep-math-9b6b.conradrensch1.workers.dev/run')"
-          echo "$response"
-          echo "$response" | grep -q '"ok"[[:space:]]*:[[:space:]]*true'
-
-          post_url="$(printf '%s' "$response" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("url", ""))')"
-          test -n "$post_url"
-
-          curl --fail --silent --show-error --location --max-time 30 -o /tmp/post.html "$post_url"
-          grep -Fq "$image_url" /tmp/post.html
-
-          curl --fail --silent --show-error --location --retry 4 --retry-all-errors --retry-delay 2 --max-time 45 \
-            -A 'Mozilla/5.0 (compatible; TheManThatCooksImageCheck/1.0)' \
-            -o /tmp/recipe-image "$image_url"
-          test -s /tmp/recipe-image
-
-          echo "VERIFIED_POST_URL=$post_url"
-          echo "VERIFIED_IMAGE_URL=$image_url"
+      - name: Publishing summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo '### The Man That Cooks Sometimes'
+            echo "- Queue ID: ${{ steps.prepare.outputs.queue_id }}"
+            echo "- Image storage: ${{ steps.prepare.outputs.image_storage }}"
+            echo "- Image URL: ${{ steps.prepare.outputs.image_url }}"
+            echo "- Publish action: ${{ steps.publish.outputs.publish_action }}"
+            echo "- Post URL: ${{ steps.publish.outputs.post_url }}"
+          } >> "$GITHUB_STEP_SUMMARY"
