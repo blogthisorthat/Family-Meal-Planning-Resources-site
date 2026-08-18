@@ -1,13 +1,13 @@
 {
-  "recordedAt": "2026-08-18T16:13:50Z",
+  "recordedAt": "2026-08-18T16:18:23Z",
   "ok": true,
   "workflowOutcome": "success",
-  "queueId": "cooking-2026-08-18-cheesy-beef-taco-rice-skillet-001",
-  "title": "Easy Cheesy Beef Taco Rice Skillet (One-Pan Family Dinner)",
-  "primarySeoTarget": "cheesy beef taco rice skillet",
-  "publishAction": "none",
-  "postUrl": "https://themanthatcookssometimes.blogspot.com/2026/08/easy-cheesy-beef-taco-rice-skillet-one.html",
-  "imageUrl": "https://raw.githubusercontent.com/blogthisorthat/Family-Meal-Planning-Resources-site/main/blogger-publisher/images/cooking-2026-08-18-cheesy-beef-taco-rice-skillet-001.jpg",
-  "imageStorage": "github-raw",
+  "queueId": "recipe-2026-08-18-creamy-sausage-pepper-skillet-pasta",
+  "title": "Creamy Sausage and Pepper Skillet Pasta (35-Minute Dinner)",
+  "primarySeoTarget": "creamy sausage and pepper pasta",
+  "publishAction": "published",
+  "postUrl": "https://themanthatcookssometimes.blogspot.com/2026/08/creamy-sausage-and-pepper-skillet-pasta.html",
+  "imageUrl": "https://raw.githubusercontent.com/blogthisorthat/Family-Meal-Planning-Resources-site/main/blogger-publisher/staging/recipe-2026-08-18-creamy-sausage-pepper-skillet-pasta.jpg",
+  "imageStorage": "github-raw-fallback",
   "imageStatus": "ready"
 }
