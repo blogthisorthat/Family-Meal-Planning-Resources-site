@@ -28,6 +28,8 @@ const NAV_CSS = `
   }
 </style>`;
 
+const ADSENSE = `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6189178617338830" crossorigin="anonymous"></script>`;
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -44,6 +46,7 @@ export default {
       .on('head', {
         element(element) {
           element.append(NAV_CSS, { html: true });
+          element.append(ADSENSE, { html: true });
         }
       })
       .on('.nav', {
