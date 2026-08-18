@@ -106,8 +106,8 @@ def safe_source_path(item: dict[str, Any]) -> pathlib.Path:
     path = pathlib.PurePosixPath(raw_path)
     if path.is_absolute() or ".." in path.parts:
         fail("imageSourcePath must be a safe repository-relative path")
-    if len(path.parts) < 3 or path.parts[:2] != ("blogger-publisher", "staging"):
-        fail("imageSourcePath must be under blogger-publisher/staging/")
+    if len(path.parts) < 3 or path.parts[:2] != ("blogger-publisher", "images"):
+        fail("imageSourcePath must be under blogger-publisher/images/")
     suffix = path.suffix.lower()
     if suffix not in ALLOWED_SUFFIX:
         fail("Staged image must be JPG, JPEG, PNG, or WEBP")
