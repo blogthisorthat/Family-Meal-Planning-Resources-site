@@ -6,7 +6,11 @@ on:
       - main
     paths:
       - blogger-publisher/queue/current.json
-      - blogger-publisher/staging/**
+      - blogger-publisher/image-parts/**
+      - blogger-publisher/images/**
+  schedule:
+    - cron: '0 8 * * *'
+      timezone: "America/New_York"
   workflow_dispatch:
 
 permissions:
@@ -34,6 +38,42 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Normalize the final generated-image directory
+        id: normalize
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('blogger-publisher/publisher_pipeline.py')
+          text = path.read_text(encoding='utf-8')
+          updated = text.replace(
+              '("blogger-publisher", "staging")',
+              '("blogger-publisher", "images")'
+          ).replace(
+              'under blogger-publisher/staging/',
+              'under blogger-publisher/images/'
+          )
+          changed = updated != text
+          if changed:
+              path.write_text(updated, encoding='utf-8')
+          with open('/tmp/normalize-output', 'w', encoding='utf-8') as handle:
+              handle.write('true' if changed else 'false')
+          PY
+          echo "changed=$(cat /tmp/normalize-output)" >> "$GITHUB_OUTPUT"
+
+      - name: Commit the publisher path correction
+        if: steps.normalize.outputs.changed == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add blogger-publisher/publisher_pipeline.py
+          git commit -m "Use final images directory in Blogger publisher [skip ci]"
+          git push origin HEAD:main
+
       - name: Assemble the exact generated raster image
         id: assemble
         shell: bash
@@ -41,18 +81,18 @@ jobs:
           set -euo pipefail
           python3 blogger-publisher/assemble_staged_image.py
 
-      - name: Commit the staged raster image
+      - name: Commit the generated raster image
         if: steps.assemble.outputs.assembled == 'true'
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -A blogger-publisher/queue/current.json blogger-publisher/staging blogger-publisher/image-parts
+          git add -A blogger-publisher/queue/current.json blogger-publisher/images blogger-publisher/image-parts
           git commit -m "Assemble generated recipe image for ${{ steps.assemble.outputs.queue_id }} [skip ci]"
           git push origin HEAD:main
 
-      - name: Wait for the staged raster image to be publicly readable
+      - name: Wait for the generated raster image to be publicly readable
         if: steps.assemble.outputs.assembled == 'true'
         shell: bash
         env:
@@ -63,17 +103,17 @@ jobs:
           image_url="https://raw.githubusercontent.com/blogthisorthat/Family-Meal-Planning-Resources-site/main/${IMAGE_PATH}"
           for attempt in $(seq 1 12); do
             if curl --fail --silent --show-error --location --max-time 45 \
-              -A 'TheManThatCooksImageStageCheck/2.0' \
-              -o /tmp/staged-recipe-image "${image_url}?t=$(date +%s)-${attempt}"; then
-              actual="$(sha256sum /tmp/staged-recipe-image | awk '{print $1}')"
+              -A 'TheManThatCooksImageStageCheck/3.0' \
+              -o /tmp/generated-recipe-image "${image_url}?t=$(date +%s)-${attempt}"; then
+              actual="$(sha256sum /tmp/generated-recipe-image | awk '{print $1}')"
               if [ "$actual" = "$EXPECTED_SHA256" ]; then
-                echo 'Staged generated image is live and byte-for-byte verified.'
+                echo 'Generated image is live and byte-for-byte verified.'
                 exit 0
               fi
             fi
             sleep $((attempt * 2))
           done
-          echo 'Staged generated image did not become publicly readable in time.' >&2
+          echo 'Generated image did not become publicly readable in time.' >&2
           exit 1
 
       - name: Validate and prepare the generated recipe image
