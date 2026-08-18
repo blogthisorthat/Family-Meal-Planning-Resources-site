@@ -1,13 +1,13 @@
 {
-  "recordedAt": "2026-08-18T17:56:40Z",
-  "ok": false,
-  "workflowOutcome": "skipped",
+  "recordedAt": "2026-08-18T17:58:12Z",
+  "ok": true,
+  "workflowOutcome": "success",
   "queueId": "recipe-2026-08-18-creamy-cajun-chicken-sausage-pasta-test",
   "title": "Creamy Cajun Chicken and Sausage Pasta (Easy 40-Minute Dinner)",
   "primarySeoTarget": "creamy Cajun chicken and sausage pasta",
   "publishAction": "none",
-  "postUrl": null,
+  "postUrl": "https://themanthatcookssometimes.blogspot.com/2026/08/creamy-cajun-chicken-and-sausage-pasta.html",
   "imageUrl": "https://raw.githubusercontent.com/blogthisorthat/Family-Meal-Planning-Resources-site/main/blogger-publisher/images/recipe-2026-08-18-creamy-cajun-chicken-sausage-pasta-test.jpg",
-  "imageStorage": "github-raw",
+  "imageStorage": "github-raw-fallback",
   "imageStatus": "ready"
 }
