@@ -1,13 +1,13 @@
 {
-  "recordedAt": "2026-08-18T16:18:23Z",
-  "ok": true,
-  "workflowOutcome": "success",
-  "queueId": "recipe-2026-08-18-creamy-sausage-pepper-skillet-pasta",
-  "title": "Creamy Sausage and Pepper Skillet Pasta (35-Minute Dinner)",
-  "primarySeoTarget": "creamy sausage and pepper pasta",
-  "publishAction": "published",
-  "postUrl": "https://themanthatcookssometimes.blogspot.com/2026/08/creamy-sausage-and-pepper-skillet-pasta.html",
-  "imageUrl": "https://raw.githubusercontent.com/blogthisorthat/Family-Meal-Planning-Resources-site/main/blogger-publisher/staging/recipe-2026-08-18-creamy-sausage-pepper-skillet-pasta.jpg",
-  "imageStorage": "github-raw-fallback",
+  "recordedAt": "2026-08-18T16:55:49Z",
+  "ok": false,
+  "workflowOutcome": "skipped",
+  "queueId": "recipe-2026-08-18-creamy-cajun-chicken-sausage-pasta-test",
+  "title": "Creamy Cajun Chicken and Sausage Pasta (Easy 40-Minute Dinner)",
+  "primarySeoTarget": "creamy Cajun chicken and sausage pasta",
+  "publishAction": "none",
+  "postUrl": null,
+  "imageUrl": "https://raw.githubusercontent.com/blogthisorthat/Family-Meal-Planning-Resources-site/main/blogger-publisher/images/recipe-2026-08-18-creamy-cajun-chicken-sausage-pasta-test.jpg",
+  "imageStorage": "github-raw",
   "imageStatus": "ready"
 }
