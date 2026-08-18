@@ -3,8 +3,9 @@
 
 This exists only because the publishing integration writes text files more
 reliably than binary blobs. GitHub Actions assembles the exact generated raster
-image, verifies its SHA-256 digest and image signature, commits the binary image,
-and deletes the temporary parts before the publishing pipeline continues.
+image under blogger-publisher/images/, verifies its SHA-256 digest and image
+signature, commits the binary image, and deletes the temporary parts before the
+publishing pipeline continues.
 """
 from __future__ import annotations
 
@@ -16,7 +17,7 @@ import os
 import pathlib
 import re
 import sys
-from typing import Any
+from typing import Any, NoReturn
 
 QUEUE_PATH = pathlib.Path(os.environ.get("QUEUE_PATH", "blogger-publisher/queue/current.json"))
 MAX_IMAGE_BYTES = 10 * 1024 * 1024
@@ -32,7 +33,7 @@ def output(name: str, value: Any) -> None:
     print(f"{name}={text}")
 
 
-def fail(message: str) -> "NoReturn":
+def fail(message: str) -> NoReturn:
     raise RuntimeError(message)
 
 
@@ -80,7 +81,7 @@ def main() -> None:
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{2,199}", queue_id):
         fail("Invalid queueId")
 
-    target = safe_repo_path(str(item.get("imageSourcePath") or ""), ("blogger-publisher", "staging"))
+    target = safe_repo_path(str(item.get("imageSourcePath") or ""), ("blogger-publisher", "images"))
     if target.suffix.lower() not in ALLOWED_SUFFIXES:
         fail("Target image must be JPG, JPEG, PNG, or WEBP")
     if target.stem != queue_id:
