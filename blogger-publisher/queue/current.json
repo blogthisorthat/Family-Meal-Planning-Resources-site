@@ -23,15 +23,7 @@
     "Dad Friendly Recipes"
   ],
   "createdAt": "2026-08-18T15:30:00Z",
-  "imageBase64Parts": [
-    "blogger-publisher/image-parts/recipe-2026-08-18-creamy-sausage-pepper-skillet-pasta.part00.b64",
-    "blogger-publisher/image-parts/recipe-2026-08-18-creamy-sausage-pepper-skillet-pasta.part01.b64",
-    "blogger-publisher/image-parts/recipe-2026-08-18-creamy-sausage-pepper-skillet-pasta.part02.b64",
-    "blogger-publisher/image-parts/recipe-2026-08-18-creamy-sausage-pepper-skillet-pasta.part03.b64",
-    "blogger-publisher/image-parts/recipe-2026-08-18-creamy-sausage-pepper-skillet-pasta.part04.b64",
-    "blogger-publisher/image-parts/recipe-2026-08-18-creamy-sausage-pepper-skillet-pasta.part05.b64",
-    "blogger-publisher/image-parts/recipe-2026-08-18-creamy-sausage-pepper-skillet-pasta.part06.b64"
-  ],
   "imageSha256": "683b470568a772cf2bfcec4ee2bebdbf1767b02d09404c17cb4c3db1996156d9",
-  "imageAssemblyStatus": "pending"
+  "imageAssemblyStatus": "complete",
+  "imageAssemblySha256": "683b470568a772cf2bfcec4ee2bebdbf1767b02d09404c17cb4c3db1996156d9"
 }
