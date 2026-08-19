@@ -1,13 +1,13 @@
 {
-  "recordedAt": "2026-08-19T12:27:51Z",
-  "ok": false,
-  "workflowOutcome": "skipped",
+  "recordedAt": "2026-08-19T12:28:23Z",
+  "ok": true,
+  "workflowOutcome": "success",
   "queueId": "recipe-2026-08-19-creamy-taco-beef-penne-001",
   "title": "Creamy Taco Beef Penne Skillet (30-Minute Dinner)",
   "primarySeoTarget": "creamy taco pasta with ground beef",
-  "publishAction": "none",
-  "postUrl": null,
-  "imageUrl": null,
-  "imageStorage": null,
-  "imageStatus": "staged"
+  "publishAction": "published",
+  "postUrl": "https://themanthatcookssometimes.blogspot.com/2026/08/creamy-taco-beef-penne-skillet-30.html",
+  "imageUrl": "https://raw.githubusercontent.com/blogthisorthat/Family-Meal-Planning-Resources-site/main/blogger-publisher/images/recipe-2026-08-19-creamy-taco-beef-penne-001.jpg",
+  "imageStorage": "github-raw-fallback",
+  "imageStatus": "ready"
 }
