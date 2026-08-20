@@ -1,0 +1,10 @@
+{
+  "queueId": "recipe-2026-08-20-cheeseburger-beef-penne-skillet-001",
+  "ok": false,
+  "formatValid": true,
+  "bytes": 44674,
+  "expectedSha256": "a480e14e79ad637c972694b169695172a2380d2876e56697e5416cee199475e4",
+  "actualSha256": "f5e306eda16104069e5e38b19bc96a2c6a25882a52d3ea73291fa39c69241201",
+  "target": "blogger-publisher/images/recipe-2026-08-20-cheeseburger-beef-penne-skillet-001.jpg",
+  "error": "SHA-256 mismatch"
+}
