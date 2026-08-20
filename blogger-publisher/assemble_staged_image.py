@@ -1,12 +1,5 @@
 #!/usr/bin/env python3
-"""Reconstruct a generated recipe image from temporary base64 text parts.
-
-This exists only because the publishing integration writes text files more
-reliably than binary blobs. GitHub Actions assembles the exact generated raster
-image under blogger-publisher/images/, verifies its SHA-256 digest and image
-signature, commits the binary image, and deletes the temporary parts before the
-publishing pipeline continues.
-"""
+"""Reconstruct a generated recipe image from temporary base64 text parts."""
 from __future__ import annotations
 
 import base64
@@ -20,6 +13,7 @@ import sys
 from typing import Any, NoReturn
 
 QUEUE_PATH = pathlib.Path(os.environ.get("QUEUE_PATH", "blogger-publisher/queue/current.json"))
+DIAG_PATH = pathlib.Path("blogger-publisher/state/last-image-assembly.json")
 MAX_IMAGE_BYTES = 10 * 1024 * 1024
 ALLOWED_SUFFIXES = {".jpg", ".jpeg", ".png", ".webp"}
 
@@ -37,6 +31,11 @@ def fail(message: str) -> NoReturn:
     raise RuntimeError(message)
 
 
+def write_diag(payload: dict[str, Any]) -> None:
+    DIAG_PATH.parent.mkdir(parents=True, exist_ok=True)
+    DIAG_PATH.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
 def safe_repo_path(raw: str, required_prefix: tuple[str, ...]) -> pathlib.Path:
     path = pathlib.PurePosixPath(raw)
     if path.is_absolute() or ".." in path.parts:
@@ -51,17 +50,12 @@ def validate_image(data: bytes, suffix: str) -> None:
         fail("Decoded image is empty")
     if len(data) > MAX_IMAGE_BYTES:
         fail("Decoded image exceeds 10 MB")
-    jpeg = data.startswith(b"\xff\xd8\xff")
-    png = data.startswith(b"\x89PNG\r\n\x1a\n")
+    jpeg = data.startswith(b"\xff\xd8\xff") and data.endswith(b"\xff\xd9")
+    png = data.startswith(b"\x89PNG\r\n\x1a\n") and data.endswith(b"IEND\xaeB`\x82")
     webp = len(data) >= 12 and data[:4] == b"RIFF" and data[8:12] == b"WEBP"
-    expected = {
-        ".jpg": jpeg,
-        ".jpeg": jpeg,
-        ".png": png,
-        ".webp": webp,
-    }[suffix]
+    expected = {".jpg": jpeg, ".jpeg": jpeg, ".png": png, ".webp": webp}[suffix]
     if not expected:
-        fail(f"Decoded bytes do not match {suffix} image format")
+        fail(f"Decoded bytes do not match a complete {suffix} image format")
 
 
 def main() -> None:
@@ -74,7 +68,7 @@ def main() -> None:
         output("assembled", "false")
         output("image_path", item.get("imageSourcePath", ""))
         return
-    if not isinstance(parts, list) or not parts or any(not isinstance(p, str) for p in parts):
+    if not isinstance(parts, list) or any(not isinstance(p, str) for p in parts):
         fail("imageBase64Parts must be a non-empty array of paths")
 
     queue_id = str(item.get("queueId") or "")
@@ -102,19 +96,34 @@ def main() -> None:
     try:
         data = base64.b64decode("".join(encoded_chunks), validate=True)
     except (binascii.Error, ValueError) as exc:
+        write_diag({"queueId": queue_id, "ok": False, "error": f"Base64 reconstruction failed: {exc}"})
         raise RuntimeError(f"Base64 image reconstruction failed: {exc}") from exc
 
     expected_sha = str(item.get("imageSha256") or "").lower()
     actual_sha = hashlib.sha256(data).hexdigest()
+    try:
+        validate_image(data, target.suffix.lower())
+    except Exception as exc:
+        write_diag({"queueId": queue_id, "ok": False, "bytes": len(data), "actualSha256": actual_sha, "error": str(exc)})
+        raise
+
     if not re.fullmatch(r"[0-9a-f]{64}", expected_sha):
         fail("imageSha256 is required and must be a SHA-256 hex digest")
     if actual_sha != expected_sha:
+        write_diag({
+            "queueId": queue_id,
+            "ok": False,
+            "formatValid": True,
+            "bytes": len(data),
+            "expectedSha256": expected_sha,
+            "actualSha256": actual_sha,
+            "target": target.as_posix(),
+            "error": "SHA-256 mismatch"
+        })
         fail(f"Decoded image SHA-256 mismatch: expected {expected_sha}, got {actual_sha}")
 
-    validate_image(data, target.suffix.lower())
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_bytes(data)
-
     for part in part_paths:
         part.unlink()
 
@@ -122,6 +131,8 @@ def main() -> None:
     item["imageAssemblyStatus"] = "complete"
     item["imageAssemblySha256"] = actual_sha
     QUEUE_PATH.write_text(json.dumps(item, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    if DIAG_PATH.exists():
+        DIAG_PATH.unlink()
 
     output("assembled", "true")
     output("image_path", target.as_posix())
