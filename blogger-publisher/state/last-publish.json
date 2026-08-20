@@ -1,13 +1,13 @@
 {
-  "recordedAt": "2026-08-20T13:54:14Z",
+  "recordedAt": "2026-08-20T13:55:52Z",
   "ok": false,
-  "workflowOutcome": "skipped",
+  "workflowOutcome": "failure",
   "queueId": "recipe-2026-08-20-cheeseburger-beef-penne-skillet-001",
   "title": "Easy Cheeseburger Penne Skillet (30-Minute Dinner)",
   "primarySeoTarget": "cheeseburger pasta skillet",
   "publishAction": "none",
   "postUrl": null,
   "imageUrl": "https://raw.githubusercontent.com/blogthisorthat/Family-Meal-Planning-Resources-site/main/blogger-publisher/images/recipe-2026-08-20-cheeseburger-beef-penne-skillet-001.jpg",
-  "imageStorage": null,
-  "imageStatus": "staged"
+  "imageStorage": "github-raw-fallback",
+  "imageStatus": "ready"
 }
