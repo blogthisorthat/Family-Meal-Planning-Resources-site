@@ -1,13 +1,13 @@
 {
-  "recordedAt": "2026-08-20T12:54:03Z",
-  "ok": true,
-  "workflowOutcome": "success",
-  "queueId": "recipe-2026-08-19-creamy-taco-beef-penne-001",
-  "title": "Creamy Taco Beef Penne Skillet (30-Minute Dinner)",
-  "primarySeoTarget": "creamy taco pasta with ground beef",
+  "recordedAt": "2026-08-20T12:55:38Z",
+  "ok": false,
+  "workflowOutcome": "skipped",
+  "queueId": "recipe-2026-08-20-cheeseburger-beef-penne-skillet-001",
+  "title": "Easy Cheeseburger Penne Skillet (30-Minute Dinner)",
+  "primarySeoTarget": "cheeseburger pasta skillet",
   "publishAction": "none",
-  "postUrl": "https://themanthatcookssometimes.blogspot.com/2026/08/creamy-taco-beef-penne-skillet-30.html",
-  "imageUrl": "https://raw.githubusercontent.com/blogthisorthat/Family-Meal-Planning-Resources-site/main/blogger-publisher/images/recipe-2026-08-19-creamy-taco-beef-penne-001.jpg",
-  "imageStorage": "github-raw-fallback",
-  "imageStatus": "ready"
+  "postUrl": null,
+  "imageUrl": "https://raw.githubusercontent.com/blogthisorthat/Family-Meal-Planning-Resources-site/main/blogger-publisher/images/recipe-2026-08-20-cheeseburger-beef-penne-skillet-001.jpg",
+  "imageStorage": null,
+  "imageStatus": "staged"
 }
